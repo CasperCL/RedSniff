@@ -96,7 +96,11 @@ print_help()
 	printf("RLSniffer commands:\n");
 	printf("-h: show help\n");
 	printf("-i: specify interface\n");
+  printf("-x: create an index file with csv\n");
+  printf("-z: apply compression\n");
 	printf("-d: specify PCAP file log directory\n");
+  printf("-b: run in background as deamon\n");
+  printf("-p: number of packets to capture, before creating a new file\n");
 
 }
  
@@ -296,7 +300,6 @@ int main(int argc, char **argv)
  	struct bpf_program fp;   /* compiled filter program (expression) */
  	bpf_u_int32 mask;   /* subnet mask */
  	bpf_u_int32 net;   /* ip */
- 	int num_packets ;   /* number of packets to capture */
 
  	if(argc > 1 && strncmp(*(argv), "-h", 2)) {
  		print_help();
@@ -322,10 +325,10 @@ int main(int argc, char **argv)
    			exit(EXIT_FAILURE);
   		}
  	}
- 	printf("\nEnter no. of packets you want to capture: ");
-    scanf("%d",&num_packets);
-    printf("\nWhich kind of packets you want to capture : ");
-    scanf("%s",filter_exp);
+
+    // check if filter is supplied in arguments
+
+
  	/* get network number and mask associated with capture device */
  	if (pcap_lookupnet(dev, &net, &mask, errbuf) == -1) {
   		fprintf(stderr, "Couldn't get netmask for device %s: %s\n", dev, errbuf);
@@ -334,8 +337,7 @@ int main(int argc, char **argv)
  	}
  
  	/* print capture info */
- 	printf("Device: %s\n", dev);
- 	printf("Number of packets: %d\n", num_packets);
+ 	printf("Interface: %s\n", dev);
  	printf("Filter expression: %s\n", filter_exp);
  
  	/* open capture device */
@@ -366,7 +368,7 @@ int main(int argc, char **argv)
  	}
  
  	/* now we can set our callback function */
- 	pcap_loop(handle, num_packets, got_packet, NULL);
+ 	pcap_loop(handle, 0, got_packet, NULL);
  
  	/* cleanup */
  	pcap_freecode(&fp);

@@ -1,5 +1,5 @@
 all:
-	gcc RedSniff.c -o RedSniff -lpcap
+	gcc RedSniff.c -o RedSniff.out -lpcap
 
 
 install: RedSniff
