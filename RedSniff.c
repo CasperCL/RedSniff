@@ -86,13 +86,7 @@ print_help();
 void
 print_help() 
 {
-
-	printf("=============================\n");
-	printf("==========         ==========\n");
-	printf("--------- RLSniffer ---------\n");
-	printf("==========         ==========\n");
-	printf("=============================\n");
-	printf("RLSniffer is an open source NIC capture tool.\n");
+	printf("RLSniffer is an open source IC capture tool.\n");
 	printf("RLSniffer commands:\n");
 	printf("-h: show help\n");
 	printf("-i: specify interface\n");
@@ -301,32 +295,59 @@ int main(int argc, char **argv)
  	bpf_u_int32 mask;   /* subnet mask */
  	bpf_u_int32 net;   /* ip */
 
- 	if(argc > 1 && strncmp(*(argv), "-h", 2)) {
- 		print_help();
- 		return 0;
- 	}
- 
- 	/* check for capture device name on command-line */
-	if (argc == 2) {
-  		dev = argv[1];
- 	} else if (argc > 3) {
-  		fprintf(stderr, "error: unrecognized command-line options\n\n");
- 		printf("Usage: %s [interface]\n", argv[0]);
- 		printf("\n");
- 		printf("Options:\n");
- 		printf("    interface    Listen on <interface> for packets.\n");
- 		printf("\n");
-  		exit(EXIT_FAILURE);
- 	} else {
-  		/* find a capture device if not specified on command-line */
-  		dev = pcap_lookupdev(errbuf);
-  		if (dev == NULL) {
-   			fprintf(stderr, "Couldn't find default device: %s\n", errbuf);
-   			exit(EXIT_FAILURE);
-  		}
- 	}
 
-    // check if filter is supplied in arguments
+  int interface_specified = 0;
+  // handle commandline arguments
+  for(int i = 1; i < argc; i+=2){
+    char * arg = argv[i];
+    char argument_char = argv[i][1];
+    char * argument_contents = argv[i+1];
+
+    switch(argument_char){
+      case 'h':
+        print_help();
+        return 0;
+
+      // run in background
+      case 'b':
+        break;
+      // directory for logs
+      case 'd':
+        
+        break;
+      // select the interface to capture on
+      case 'i':
+        if(!argument_contents) {
+          fprintf("%s\n%s\n", "Missing interface specification.", 
+            "Use the -i <interface_name> to capture from a device");
+          return 0;
+        }
+        dev = argument_contents;
+        interface_specified = 1;
+        break;
+      // number of packets to capture before creating a new file
+      case 'p':
+        break;
+      // create an index file with csv
+      case 'x':
+        break;
+      // apply compression
+      case 'z':
+        break;
+      
+    }
+  }
+
+/* find a capture device if not specified on command-line */
+  if(!interface_specified) {
+      dev = pcap_lookupdev(errbuf);
+      if (dev == NULL) {
+        fprintf(stderr, "Couldn't find default device: %s\n", errbuf);
+        exit(EXIT_FAILURE);
+      }
+  }
+
+  // check if filter is supplied in arguments
 
 
  	/* get network number and mask associated with capture device */
@@ -367,6 +388,7 @@ int main(int argc, char **argv)
   		exit(EXIT_FAILURE);
  	}
  
+  printf("\nCapture started\n");
  	/* now we can set our callback function */
  	pcap_loop(handle, 0, got_packet, NULL);
  
